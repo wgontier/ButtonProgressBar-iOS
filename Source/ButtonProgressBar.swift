@@ -38,7 +38,7 @@ public class ButtonProgressBar: UIButton {
     /**
      Initialize programmaticaly just like you would any other UIButton.
     */
-    override public init(frame: CGRect) {
+    @objc override public init(frame: CGRect) {
         super.init(frame: frame)
         
         layer.cornerRadius = cornerRadius
@@ -63,11 +63,11 @@ public class ButtonProgressBar: UIButton {
         progressLayer.lineWidth = frame.height*2
         
         layer.addSublayer(progressLayer)
-        self.bringSubview(toFront: titleLabel!)
-        self.bringSubview(toFront: imageView!)
+        self.bringSubviewToFront(titleLabel!)
+        self.bringSubviewToFront(imageView!)
     }
     
-    required public init?(coder aDecoder: NSCoder) {
+    @objc required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         
         layer.cornerRadius = cornerRadius
@@ -92,8 +92,8 @@ public class ButtonProgressBar: UIButton {
         progressLayer.lineWidth = frame.height*2
         
         layer.addSublayer(progressLayer)
-        self.bringSubview(toFront: titleLabel!)
-        self.bringSubview(toFront: imageView!)
+        self.bringSubviewToFront(titleLabel!)
+        self.bringSubviewToFront(imageView!)
     }
     
     /**
@@ -101,7 +101,7 @@ public class ButtonProgressBar: UIButton {
      - Parameter timePeriod (optional): The total time (animation + padding, default 2.0) that 1 cycle of the loading takes.
      - Parameter timePadding (optional): The duration (default 0.5), in seconds, before starting the next cycle.
     */
-    public func startIndeterminate(withTimePeriod time: TimeInterval = 2.0, andTimePadding padding: TimeInterval = 0.5) {
+    @objc public func startIndeterminate(withTimePeriod time: TimeInterval = 2.0, andTimePadding padding: TimeInterval = 0.5) {
         timer?.invalidate()
         self.resetProgress()
         timer = Timer.scheduledTimer(timeInterval: time,
@@ -110,7 +110,7 @@ public class ButtonProgressBar: UIButton {
                                      userInfo: padding,
                                      repeats: true)
         timer?.fire()
-        RunLoop.current.add(timer!, forMode: .defaultRunLoopMode)
+        RunLoop.current.add(timer!, forMode: RunLoop.Mode.default)
     }
     
     @objc func animateIndeterminate(sender: Timer) {
@@ -119,7 +119,7 @@ public class ButtonProgressBar: UIButton {
         stroke.fromValue = 0.0
         stroke.toValue = 0.5
         stroke.duration = time
-        stroke.fillMode = kCAFillModeForwards
+        stroke.fillMode = CAMediaTimingFillMode.forwards
         stroke.isRemovedOnCompletion = false
         stroke.timingFunction = CAMediaTimingFunction(controlPoints: 1, 0, 1, 1)
         self.progressLayer.add(stroke, forKey: nil)
@@ -128,7 +128,7 @@ public class ButtonProgressBar: UIButton {
     /**
      Stop indeterminate loading.
     */
-    public func stopIndeterminate() {
+    @objc public func stopIndeterminate() {
         timer?.invalidate()
     }
     
@@ -136,7 +136,7 @@ public class ButtonProgressBar: UIButton {
      Reset progress to 0.0 unanimated.
      See `setProgress(progress:,animated:)` to set progress animated.
     */
-    public func resetProgress() {
+    @objc public func resetProgress() {
         self.hideImage(true)
         self.hideTitle(false)
         self.setProgress(progress: 0.0, false)
@@ -154,7 +154,7 @@ public class ButtonProgressBar: UIButton {
      - Parameter progreaa: Ranges from 0.0 to 1.0
      - Parameter animated: If true, linearly animates to target progress value.
     */
-    public func setProgress(progress: CGFloat, _ animated: Bool) {
+    @objc public func setProgress(progress: CGFloat, _ animated: Bool) {
         if !animated {
             progressLayer.strokeEnd = progress / 2
         }
@@ -162,9 +162,9 @@ public class ButtonProgressBar: UIButton {
             let stroke = CABasicAnimation(keyPath: "strokeEnd")
             stroke.fromValue = self.progress
             stroke.toValue = progress
-            stroke.fillMode = kCAFillModeForwards
+            stroke.fillMode = CAMediaTimingFillMode.forwards
             stroke.isRemovedOnCompletion = false
-            stroke.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
+            stroke.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
             self.progressLayer.add(stroke, forKey: nil)
         }
         self.progress = progress
@@ -173,7 +173,7 @@ public class ButtonProgressBar: UIButton {
     /**
         Set title label text.
     */
-    public override func setTitle(_ title: String?, for state: UIControlState) {
+    @objc public override func setTitle(_ title: String?, for state: UIControl.State) {
         super.setTitle(title, for: state)
     }
     
@@ -181,7 +181,7 @@ public class ButtonProgressBar: UIButton {
      Show / Hide title text.
      - Parameter _ hidden: Title hiddden if true, shown if false. 
      */
-    public func hideTitle(_ hidden: Bool) {
+    @objc public func hideTitle(_ hidden: Bool) {
         titleLabel!.layer.opacity = hidden ? 0.0 : 1.0
     }
     
@@ -189,7 +189,7 @@ public class ButtonProgressBar: UIButton {
      Show / Hide image.
      - Parameter hidden: Title hiddden if true, shown if false.
      */
-    public func hideImage(_ hidden: Bool) {
+    @objc public func hideImage(_ hidden: Bool) {
         if hidden {
             self.imageView?.layer.removeAllAnimations()
             imageView?.layer.transform = CATransform3DMakeScale(0.0, 0.0, 0.0)
@@ -198,9 +198,9 @@ public class ButtonProgressBar: UIButton {
             completionAnim.keyPath = "transform"
             completionAnim.fromValue = CATransform3DMakeScale(0.0, 0.0, 0.0)
             completionAnim.toValue = CATransform3DIdentity
-            completionAnim.fillMode = kCAFillModeForwards
+            completionAnim.fillMode = CAMediaTimingFillMode.forwards
             completionAnim.isRemovedOnCompletion = false
-            completionAnim.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
+            completionAnim.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
             self.imageView?.layer.add(completionAnim, forKey: nil)
         }
     }
@@ -209,7 +209,7 @@ public class ButtonProgressBar: UIButton {
      Stop indeterminate loading if active, set progress to 1.0 animated, and display completion checkmark.
      Needs to be called explicitly when loading determinate as well.
     */
-    public func triggerCompletion() {
+    @objc public func triggerCompletion() {
         self.stopIndeterminate()
         self.setProgress(progress: 1.0, true)
         self.hideTitle(true)
@@ -224,14 +224,14 @@ public class ButtonProgressBar: UIButton {
      NOTE: This image must be set. No default exists.
     */
     
-    public func setCompletionImage(image: UIImage) {
+    @objc public func setCompletionImage(image: UIImage) {
         self.setImage(image.withRenderingMode(.alwaysTemplate), for: .normal)
     }
     
     /**
      Set progress layer color.
     */
-    public func setProgressColor(color: UIColor) {
+    @objc public func setProgressColor(color: UIColor) {
         self.progressColor = color
         self.progressLayer.strokeColor = color.cgColor
     }
@@ -239,7 +239,7 @@ public class ButtonProgressBar: UIButton {
     /**
      Set button background color.
      */
-    public func setBackgroundColor(color: UIColor) {
+    @objc public func setBackgroundColor(color: UIColor) {
         self.backgroundColor = color
     }
     
